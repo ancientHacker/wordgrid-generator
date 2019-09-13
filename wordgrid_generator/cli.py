@@ -60,7 +60,7 @@ def generate(count: int, size, ratio):
             print(f"Failed to lay out '{word1}', '{word2}', '{word3}'",
                   file=sys.stderr)
             continue
-        results.append({'word1': word1, 'word2': word2, 'word3': word3,
+        results.append({'word1': word1, 'word2': word2, 'word3': word3 or '',
                         'cells': grid_strings})
     print(json.dumps(results))
 
