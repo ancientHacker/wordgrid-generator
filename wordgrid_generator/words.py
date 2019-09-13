@@ -48,24 +48,34 @@ class Words:
             random.shuffle(words)
         self.next_index = {length: 0 for length in range(3, 9)}
 
-    def pick2(self, total: int) -> (str, str):
-        """Pick two words whose lengths add to the given total length,
-        which must be in the range 9-12.  The shorter of the two
-        words is never more than two shorter than half the total.
-        The first word is always the shorter of the two."""
-        len1 = random.randrange(max(3, total // 2 - 2), total // 2 + 1)
-        words1 = self.three2eight[len1 - 3]
-        len2 = total - len1
-        words2 = self.three2eight[len2 - 3]
-        # note that we may have len1 == len2 and thus words1 is words2
-        index_1 = self.next_index[len1]
-        self.next_index[len1] = next_index_1 = (index_1 + 1) % len(words1)
-        index_2 = self.next_index[len2]
-        self.next_index[len2] = next_index_2 = (index_2 + 1) % len(words2)
-        word1 = words1[index_1]
-        word2 = words2[index_2]
-        if next_index_1 == 0:
-            random.shuffle(words1)
-        if next_index_2 == 0:
-            random.shuffle(words2)
+    def pick2for9(self) -> (str, str):
+        """Pick two words whose lengths are 3 and 6 or 4 and 5."""
+        len1 = random.randint(3, 4)
+        len2 = 9 - len1
+        word1 = self.next_word(len1)
+        word2 = self.next_word(len2)
         return word1.upper(), word2.upper()
+
+    def pick2for12(self) -> (str, str):
+        """Pick two words whose lengths are 5 and 7 or 6 and 6."""
+        len1 = random.randint(5, 6)
+        len2 = 12 - len1
+        word1 = self.next_word(len1)
+        word2 = self.next_word(len2)
+        return word1.upper(), word2.upper()
+
+    def pick3for12(self) -> (str, str, str):
+        """Pick three four-letter words."""
+        word1 = self.next_word(4)
+        word2 = self.next_word(4)
+        word3 = self.next_word(4)
+        return word1.upper(), word2.upper(), word3.upper()
+
+    def next_word(self, length: int) -> str:
+        words = self.three2eight[length - 3]
+        index = self.next_index[length]
+        word = words[index]
+        self.next_index[length] = next_index = (index + 1) % len(words)
+        if next_index == 0:
+            random.shuffle(words)
+        return word

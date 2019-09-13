@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import json
+import random
 import sys
 
 import click
@@ -33,19 +34,34 @@ from .words import Words
               help="Number of puzzles to generate")
 @click.option('-s', '--size', default=12, show_default=True,
               help="Number of letters in each puzzle")
-def generate(count: int, size):
+@click.option('-r', '--ratio', default=0.33, show_default=True,
+              help="Fraction of 12x12 grids to fill with three 4-letter words")
+def generate(count: int, size, ratio):
+    if size not in [9, 12]:
+        raise ValueError(f"Grid size ({size}) must be 9 or 12")
+    if size == 12 and not 0 <= ratio <= 1:
+        raise ValueError(f"Ratio ({ratio}) must be between 0 and 1 (inclusive)")
     with open('Words to use.csv') as f:
         words = Words(f)
     grids = Grids(size)
     results = []
     for _ in range(count):
-        word1, word2 = words.pick2(size)
-        grid_strings = grids.grid_two(word1, word2)
+        if size == 9:
+            word1, word2 = words.pick2for9()
+            word3 = None
+        else:
+            if random.random() <= ratio:
+                word1, word2 = words.pick2for12()
+                word3 = None
+            else:
+                word1, word2, word3 = words.pick3for12()
+        grid_strings = grids.grid_words(word1, word2, word3)
         if not grid_strings:
-            print("Failed to lay out '{}' and '{}'".format(word1, word2),
+            print(f"Failed to lay out '{word1}', '{word2}', '{word3}'",
                   file=sys.stderr)
             continue
-        results.append({'word1': word1, 'word2': word2, 'cells': grid_strings})
+        results.append({'word1': word1, 'word2': word2, 'word3': word3,
+                        'cells': grid_strings})
     print(json.dumps(results))
 
 
